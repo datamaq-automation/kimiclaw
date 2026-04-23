@@ -4,38 +4,41 @@ import { promisify } from 'util';
 
 const execPromise = promisify(exec);
 
+// Cache simple en memoria del proceso (vida útil: 60 segundos)
+let cachedGitStatus: string | null = null;
+let cachedAt = 0;
+const CACHE_TTL_MS = 60000;
+
 export async function execute(context: ToolContext): Promise<ToolResult> {
   const workspacePath = '/home/agustin/openclaw-workspace';
   let gitStatusOutput = '';
-  let openclawStatusOutput = '';
   let error = '';
 
   try {
-    // 1. Obtener el git status del workspace
-    const { stdout: gitStdout, stderr: gitStderr } = await execPromise('git status', { cwd: workspacePath });
-    if (gitStderr) {
-      // Registrar errores pero no fallar el plugin si uno de los comandos falla
-      error += `Git Status Error: ${gitStderr}\n`;
+    const now = Date.now();
+    if (cachedGitStatus && (now - cachedAt) < CACHE_TTL_MS) {
+      gitStatusOutput = cachedGitStatus;
+    } else {
+      const { stdout, stderr } = await execPromise('git status --short', {
+        cwd: workspacePath,
+        timeout: 5000,
+      });
+      if (stderr) {
+        error += `Git Status Warn: ${stderr}\n`;
+      }
+      gitStatusOutput = stdout || '(sin cambios)';
+      cachedGitStatus = gitStatusOutput;
+      cachedAt = now;
     }
-    gitStatusOutput = gitStdout;
-
-    // 2. Obtener el estado de OpenClaw (incluyendo posibles actualizaciones)
-    const { stdout: ocStdout, stderr: ocStderr } = await execPromise('openclaw status');
-    if (ocStderr) {
-      error += `OpenClaw Status Error: ${ocStderr}\n`;
-    }
-    openclawStatusOutput = ocStdout;
-
   } catch (e: any) {
-    error += `Error general de ejecución: ${e.message}\n`;
+    error += `Error: ${e.message}\n`;
   }
 
   return {
-    success: error === '', // Considera 'success' si no hubo errores críticos
+    success: error === '',
     data: {
       gitStatus: gitStatusOutput,
-      openclawStatus: openclawStatusOutput,
-      error: error || undefined, // Si no hay errores, no incluyas la propiedad
-    }
+      error: error || undefined,
+    },
   };
 }
