@@ -2,47 +2,82 @@
 
 ## Estado actual
 
-**Pendiente de acceso.** Se intentó clonar el repositorio del tema WordPress para que OpenClaw tenga contexto del código fuente del sitio, pero el token GitHub configurado en el MCP (`datamaq-automation`) no tiene visibilidad sobre `https://github.com/AgustinMadygraf/wp-cursos`.
-
-## Diagnóstico
-
-- El repo devuelve `404 Not Found` vía API REST de GitHub usando el token actual.
-- Esto ocurre cuando el repo es **privado** y la cuenta que posee el token no es colaboradora.
-- El token activo pertenece a `datamaq-automation`.
-- La identidad Git local es `AgustinMadygraf`, pero no hay token personal de esa cuenta configurado en el entorno.
-
-## Soluciones posibles (elegir una)
-
-### Opción A — Invitar al bot (recomendada)
-1. Desde la cuenta `AgustinMadygraf` en GitHub, ir a `https://github.com/AgustinMadygraf/wp-cursos/settings/access`.
-2. Agregar como colaborador a la cuenta **`datamaq-automation`**.
-3. Aceptar la invitación desde la cuenta bot (o hacerla pública la invitación si es posible).
-4. Reintentar la clonación en este VPS.
-
-### Opción B — Token personal dedicado
-1. Generar un **Fine-grained Personal Access Token** desde la cuenta `AgustinMadygraf` con scope de lectura sobre `wp-cursos`.
-2. Agregar un segundo servidor MCP `github-agustin` en `~/.kimi/mcp.json` y `~/.openclaw/openclaw.json` usando ese token.
-3. Reintentar la clonación.
-
-### Opción C — Repo público temporal
-1. Hacer público el repo `wp-cursos` (solo si no contiene secrets, credenciales de DB ni claves API).
-2. Clonar directamente sin token.
-3. Volver a privado una vez clonado (aunque el historial quedará en el VPS local).
-
-### Opción D — Sincronización desde el servidor de producción
-Si el tema ya está deployado en el VPS de producción (AlmaLinux) donde corre WordPress:
-1. Configurar SSH key desde este VPS (`openclaw-server`) hacia el servidor de producción.
-2. Hacer `rsync` del directorio del tema (ej: `/var/www/html/wp-content/themes/wp-cursos/` o similar).
-3. Esto evita depender de GitHub por completo.
-
-## Ubicación propuesta una vez resuelto
+✅ **Clonado correctamente.** El repositorio privado `https://github.com/AgustinMadygraf/wp-cursos` está disponible localmente en:
 
 ```
 /home/agustin/openclaw-workspace/wp-cursos/
 ```
 
-Con esa ruta dentro de `/home/agustin`, el MCP `filesystem` ya puede leer todos los archivos (`content.php`, `functions.php`, `style.css`, etc.) sin instalar ningún MCP adicional.
+> Nota: `wp-cursos/` está en `.gitignore` del workspace para evitar commitear la instalación completa de WordPress.
 
-## Próximo paso
+---
 
-Indicar cuál opción prefiere para proceder con la clonación y configuración del contexto para Tenazas.
+## Estructura del repo
+
+El repo contiene una **instalación completa de WordPress** (core, wp-admin, wp-includes, wp-content). El tema activo y personalizado es un child theme de Blocksy.
+
+### Tema relevante: `blocksy-child-datamaq`
+
+Ruta: `wp-cursos/wp-content/themes/blocksy-child-datamaq/`
+
+| Archivo | Propósito |
+|---------|-----------|
+| `style.css` | Variables de diseño DataMaq, tipografía, dock móvil, cards glass |
+| `functions.php` | Carga modular: site-data, ajax-handlers, theme-setup; integración Chatwoot |
+| `front-page.php` | Plantilla de la home (página 205) |
+| `header.php` | Header personalizado |
+| `footer.php` | Footer personalizado |
+| `page-contact.php` | Plantilla de página de contacto |
+| `page-gracias.php` | Plantilla de página de gracias |
+| `inc/site-data.php` | Capa de datos del sitio |
+| `inc/ajax-handlers.php` | Lógica de AJAX |
+| `inc/theme-setup.php` | Setup de assets y configuración del tema |
+| `template-parts/content-hero.php` | Sección hero |
+| `template-parts/content-services.php` | Sección servicios |
+| `template-parts/content-profile.php` | Sección perfil técnico |
+| `template-parts/content-proceso.php` | Sección proceso |
+| `template-parts/content-faq.php` | Sección FAQ |
+| `template-parts/content-contact.php` | Sección contacto |
+| `template-parts/content-contact-header.php` | Header de contacto |
+| `assets/css/tailwind-dist.css` | Distribución Tailwind |
+| `assets/css/learnpress-overrides.css` | Overrides de LearnPress |
+| `docs/microauditorias/` | Documentación de parity visual vs. la SPA Vue anterior |
+
+---
+
+## Contexto para el agente
+
+- **Tema padre**: Blocksy
+- **Versión del child**: 4.0.0
+- **Autor**: Agustin Madygraf
+- **Sitio en producción**: `datamaq.com.ar` (home = página 205, slug `datamaq-home`)
+- **Chatwoot**: Integrado vía script en footer (`chatwoot.datamaq.com.ar`)
+- **Paleta**: fondo `#0c092f`, superficie `#1a1c3d`, acento naranja `#ff9a4d` / `#ff6a00`
+- **Tipografía**: Inter
+- **Dock móvil**: implementado en CSS puro (`c-parity-dock`)
+
+---
+
+## Cómo usa el agente este recurso
+
+El MCP `filesystem` ya puede leer cualquier archivo dentro de `wp-cursos/` porque la ruta está bajo `/home/agustin`.
+
+Ejemplos de uso:
+- Revisar `style.css` para proponer ajustes de diseño o accesibilidad.
+- Revisar `front-page.php` y `template-parts/` para sugerir optimizaciones de estructura o SEO.
+- Revisar `functions.php` e `inc/` para proponer mejoras de rendimiento o seguridad.
+- Revisar `docs/microauditorias/` para entender qué parity visual ya fue auditada y qué falta.
+
+---
+
+## Sincronización con producción
+
+Este repo es una copia estática. Si el sitio en producción (VPS AlmaLinux, `/home/datamaq/public_html/cursos`) se modifica directamente sin pasar por Git, puede quedar desfasado.
+
+Para mantenerlo actualizado:
+```bash
+cd /home/agustin/openclaw-workspace/wp-cursos
+git pull origin main
+```
+
+O, si la fuente de verdad es el servidor de producción, usar `rsync` desde el VPS AlmaLinux hacia esta ruta.

@@ -3,3 +3,6 @@ agents/main.bak.*/
 
 # Estado autogenerado de OpenClaw
 agents/main/.openclaw/workspace-state.json
+
+# Instalación WordPress local (repo externo; no commitear)
+wp-cursos/
