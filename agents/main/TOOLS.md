@@ -37,6 +37,18 @@
 - No guardar secretos ni credenciales en este repositorio
 - Usar este archivo para notas del entorno, no para reglas operativas
 
+## WordPress — DataMaq
+
+- Sitio web: [datamaq.com.ar](https://datamaq.com.ar)
+- Tema personalizado (repo): `https://github.com/AgustinMadygraf/wp-cursos`
+- Estado del repo en este entorno: **pendiente de clonación** (ver `~/openclaw-workspace/docs/WP_CURSOS_SETUP.md`)
+- Una vez clonado, la ruta local será: `~/openclaw-workspace/wp-cursos/`
+- Archivos clave del tema (a revisar para propuestas de mejora):
+  - `content.php` — estructura de contenido
+  - `functions.php` — lógica y hooks
+  - `style.css` — estilos principales
+  - `page.php`, `single.php`, `index.php` — templates
+
 ## Git
 
 - Repo del agente inicializado dentro de:
