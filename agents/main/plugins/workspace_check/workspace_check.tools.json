@@ -1,0 +1,26 @@
+{
+  "name": "workspace_check",
+  "description": "Checks the git status of the OpenClaw workspace at /home/agustin/openclaw-workspace and the overall OpenClaw update status.",
+  "parameters": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  },
+  "returns": {
+    "type": "object",
+    "properties": {
+      "gitStatus": {
+        "type": "string",
+        "description": "Output of git status for the workspace."
+      },
+      "openclawStatus": {
+        "type": "string",
+        "description": "Output of openclaw status, including update information."
+      },
+      "error": {
+        "type": "string",
+        "description": "Any error encountered during the checks."
+      }
+    }
+  }
+}

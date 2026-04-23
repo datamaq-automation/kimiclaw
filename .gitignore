@@ -1,0 +1,5 @@
+# Backups del agente
+agents/main.bak.*/
+
+# Estado autogenerado de OpenClaw
+agents/main/.openclaw/workspace-state.json
