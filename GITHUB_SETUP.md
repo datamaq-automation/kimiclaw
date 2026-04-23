@@ -14,7 +14,9 @@ El servidor MCP `github` ya está instalado y configurado en Kimi CLI y OpenClaw
 ### 1. Crear la cuenta dedicada de GitHub
 
 1. Andá a [github.com/signup](https://github.com/signup).
-2. Usá el **email de DataMaq** (no el personal).
+2. Elegí el email:
+   - **Opción A (recomendada)**: `openclaw@datamaq.com.ar` — más específico, desvinculado del contacto comercial general de DataMaq. Ideal si ya tenés el dominio `datamaq.com.ar` configurado para crear aliases.
+   - **Opción B (rápida)**: `contacto.datamaq@gmail.com` — si querés evitar crear un nuevo email ahora y usás el que ya existe.
 3. Elegí un username tipo `datamaq-automation` o `openclaw-bot`.
 4. Completá el CAPTCHA y verificá el email.
 
